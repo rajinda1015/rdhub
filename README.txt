@@ -1,0 +1,1 @@
+Core contact module
