@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.rad.rdhub.configs.RDCache;
+import com.rad.rdhub.dto.RDLoginDTO;
 import com.rad.rdhub.validator.RDBadRequestException;
 
 @RestController
@@ -46,6 +51,9 @@ public class RDHubController {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private RDCache rdCache;
+
 	@RequestMapping(value = "/getToken", method = RequestMethod.POST)
 	public ResponseEntity<?> getTokenForUser(@RequestParam Map<String, String> paramMap) throws Exception {
 		LOGGER.info("Request: Token request by : " + paramMap.get("username"));
@@ -69,6 +77,25 @@ public class RDHubController {
 		
 		ResponseEntity<String> response = restTemplate.exchange(sbuffer.toString(), HttpMethod.POST, httpEntity, String.class);
 		if (200 == response.getStatusCodeValue()) {
+			// Update login time
+			RDLoginDTO login = new RDLoginDTO();
+			login.setUsername(paramMap.get("username"));
+			
+			JsonParser parser = new JsonParser();
+			JsonElement rootNode = parser.parse(response.getBody());
+			JsonObject rootObject = rootNode.getAsJsonObject();
+			
+			HttpHeaders httpHeader = new HttpHeaders();
+			httpHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			httpHeader.set("Authorization", "Bearer " + rootObject.get("access_token").getAsString());
+			HttpEntity<Object> httpLoginEntity = new HttpEntity<Object>(login, httpHeader);
+			
+			sbuffer.setLength(0);
+			sbuffer.append(rdCache.getUserPortalInfo());
+			sbuffer.append("/userportal/user/updateLastLogin");
+			ResponseEntity<String> loginResponse = restTemplate.exchange(sbuffer.toString(), HttpMethod.PUT, httpLoginEntity, String.class);
+			LOGGER.info("Last login update : " + loginResponse.getBody());
+			
 			return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
 
 		} else {

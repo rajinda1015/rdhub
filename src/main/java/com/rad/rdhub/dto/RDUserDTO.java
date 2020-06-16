@@ -6,17 +6,18 @@ public class RDUserDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private long userDid;
+	private Long userDid;
 	private String firstName;
 	private char gender;
 	private String lastName;
 	private String middleName;
+	private int status;
 
-	public long getUserDid() {
+	public Long getUserDid() {
 		return userDid;
 	}
 
-	public void setUserDid(long userDid) {
+	public void setUserDid(Long userDid) {
 		this.userDid = userDid;
 	}
 
@@ -50,6 +51,14 @@ public class RDUserDTO implements Serializable {
 
 	public void setMiddleName(String middleName) {
 		this.middleName = middleName;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
 	}
 
 }
