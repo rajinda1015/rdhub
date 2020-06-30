@@ -11,7 +11,7 @@ public class RDUserDTO implements Serializable {
 	private char gender;
 	private String lastName;
 	private String middleName;
-	private int status;
+	private byte status;
 
 	public Long getUserDid() {
 		return userDid;
@@ -53,11 +53,11 @@ public class RDUserDTO implements Serializable {
 		this.middleName = middleName;
 	}
 
-	public int getStatus() {
+	public byte getStatus() {
 		return status;
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(byte status) {
 		this.status = status;
 	}
 

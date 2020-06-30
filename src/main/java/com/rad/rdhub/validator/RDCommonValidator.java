@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.rad.rdhub.dto.RDContactDTO;
 import com.rad.rdhub.dto.RDLoginDTO;
 import com.rad.rdhub.dto.RDUserDTO;
 import com.rad.rdhub.dto.RDUserRoleDTO;
@@ -21,14 +22,14 @@ public class RDCommonValidator {
 	public List<String> validateUser(RDUserDTO user, int action) throws Exception {
 		List<String> messageList = null;
 
-		if (action == RDHubConstancts.USER_ADD && (null != user.getUserDid() && user.getUserDid() > 0)) {
+		if (action == RDHubConstancts.RECORD_ADD && (null != user.getUserDid() && user.getUserDid() > 0)) {
 			messageList = new ArrayList<String>();
 			messageList.add("Cannot insert existing user again");
 		}
 
-		if (action == RDHubConstancts.USER_UPDATE && (null == user.getUserDid() || user.getUserDid() == 0)) {
+		if (action == RDHubConstancts.RECORD_UPDATE && (null == user.getUserDid() || user.getUserDid() == 0)) {
 			if (null == messageList) { messageList = new ArrayList<String>(); }
-			messageList.add("Please add user details before update the details");
+			messageList.add("Please select user before update the details");
 		}
 
 		if (null == user.getFirstName() || user.getFirstName().isEmpty()) {
@@ -66,12 +67,14 @@ public class RDCommonValidator {
 		return messageList;
 	}
 	
-	public List<String> validateLoginAccount(RDLoginDTO loginAccount) throws Exception {
+	public List<String> validateLoginAccount(RDLoginDTO loginAccount, int action) throws Exception {
 		List<String> messageList = null;
 		
-		if (null == loginAccount.getUserDid() || loginAccount.getUserDid().longValue() < 0) {
-			messageList = new ArrayList<String>();
-			messageList.add("Please select user to be created login account");
+		if (action == RDHubConstancts.RECORD_ADD) {
+			if (null == loginAccount.getUserDid() || loginAccount.getUserDid().longValue() < 0) {
+				messageList = new ArrayList<String>();
+				messageList.add("Please select user to be created login account");
+			}
 		}
 
 		if (null == loginAccount.getUsername() || loginAccount.getUsername().trim().isEmpty()) {
@@ -96,6 +99,106 @@ public class RDCommonValidator {
 			messageList.add("Password and confirm password are not same");
 		}
 		
+		return messageList;
+	}
+	
+
+	public List<String> validateBeforeStatusUpdateOfLoginAccount(RDLoginDTO loginAccount) throws Exception {
+		List<String> messageList = null;
+		
+		if (null == loginAccount.getUserDid() || loginAccount.getUserDid().longValue() < 0) {
+			messageList = new ArrayList<String>();
+			messageList.add("Please select user before update login account");
+		}
+		
+		return messageList;
+	}
+	
+	public List<String> validateRegisterUser(RDLoginDTO loginDTO) throws Exception {
+		List<String> messageListUser = null;
+		List<String> messageListAccount = null;
+		List<String> messageList = new ArrayList<String>();
+		
+		messageListUser = validateUser(loginDTO, RDHubConstancts.RECORD_ADD);
+		messageListAccount = validateLoginAccount(loginDTO, RDHubConstancts.DEFAULT);
+		
+		if (null != messageListUser && !messageListUser.isEmpty()) { messageList.addAll(messageListUser); }
+		if (null != messageListAccount && !messageListAccount.isEmpty()) { messageList.addAll(messageListAccount); }
+		
+		if (messageList.size() > 0) {
+			return messageList;
+		} else {
+			return null;
+		}
+	}
+	
+	public List<String> validateContacts(RDContactDTO[] contacts, int action) throws Exception {
+		List<String> messageList = null;
+		
+		if (null == contacts || 0 == contacts.length) {
+			messageList = new ArrayList<String>();
+			messageList.add("Please provide contact list");
+		}
+		
+		if (null != contacts && contacts.length > 0) {
+			int contactDids = 0;
+			int defaultContacts = 0;
+			int msgUserdid = 0;
+			int msgType = 0;
+			int msgValue = 0;
+			for (RDContactDTO contact : contacts) {
+				if (action == RDHubConstancts.RECORD_ADD) {
+					if (null != contact.getDid() && contact.getDid().longValue() >= 0) {
+						++contactDids;
+					}
+				} else if (action == RDHubConstancts.RECORD_UPDATE) {
+					if (null == contact.getDid() || 0 == contact.getDid().longValue()) {
+						++contactDids;
+					}
+				}
+				
+				if (null == contact.getUserDid() || contact.getUserDid() <= 0) {
+					++msgUserdid;
+				}
+				
+				if (null == contact.getType() || contact.getType().intValue() == 0) {
+					++msgType;
+				}
+				
+				if (null == contact.getValue() || contact.getValue().trim().isEmpty()) {
+					++msgValue;
+				}
+				if (contact.getDefaultValue() == RDHubConstancts.CONTACT_DEFAULT) {
+					defaultContacts++;
+				}
+			}
+			
+			if (contactDids > 0) {
+				if (null == messageList) { messageList = new ArrayList<String>(); }
+				messageList.add("Invalid contact detail");
+			}
+			
+			if (msgUserdid > 0) {
+				if (null == messageList) { messageList = new ArrayList<String>(); }
+				messageList.add("User is not provided for contact information");
+			}
+
+			if (msgType > 0) {
+				if (null == messageList) { messageList = new ArrayList<String>(); }
+				messageList.add("Please provide contact type for " + msgType + " contact(s)");
+			}
+			
+			if (msgValue > 0) {
+				if (null == messageList) { messageList = new ArrayList<String>(); }
+				messageList.add("Please provide contact value for " + msgValue + " contact(s)");
+			}
+			
+			if (defaultContacts > 1) {
+				if (null == messageList) { messageList = new ArrayList<String>(); }
+				messageList.add("You are not allowed to select more than one default contact");
+			}
+		}
+
 		return messageList;
 	}
 	

@@ -26,13 +26,11 @@ public class RDHubInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-		if (null == request.getParameter("username") && 
-				((null == request.getHeader("token") && request.getHeader("token").isEmpty())
-				|| (null == request.getHeader("rfToken") && request.getHeader("rfToken").isEmpty()))) {
+		String token = null != request.getHeader("token") ? request.getHeader("token") : request.getHeader("rfToken");
+		
+		if (null == request.getParameter("username") || (null == token || token.isEmpty())) {
 			throw new RDBadRequestException(HttpStatus.BAD_REQUEST.value() + " : [Invalid arguments]");
 		}
-		
-		String token = null != request.getHeader("token") ? request.getHeader("token") : request.getHeader("rfToken");
 		
 		try {
 			boolean result = jwtTokenUtil.validateUsernameWithToken(token, request.getParameter("username"));

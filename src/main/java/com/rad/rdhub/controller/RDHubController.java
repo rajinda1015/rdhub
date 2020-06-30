@@ -92,7 +92,7 @@ public class RDHubController {
 			
 			sbuffer.setLength(0);
 			sbuffer.append(rdCache.getUserPortalInfo());
-			sbuffer.append("/userportal/user/updateLastLogin");
+			sbuffer.append("/userportal/user/updateLastLogin?username=" + paramMap.get("username"));
 			ResponseEntity<String> loginResponse = restTemplate.exchange(sbuffer.toString(), HttpMethod.PUT, httpLoginEntity, String.class);
 			LOGGER.info("Last login update : " + loginResponse.getBody());
 			

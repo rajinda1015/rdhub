@@ -58,7 +58,7 @@ public class RDAdminPortalController {
 		
 		LOGGER.info("Request : User instance save by " + paramMap.get("username"));
 		
-		List<String> messages = validator.validateUser(user, RDHubConstancts.USER_ADD);
+		List<String> messages = validator.validateUser(user, RDHubConstancts.RECORD_ADD);
 		if (null == messages) {
 			String url = rdCache.getUserPortalInfo()
 					+ "/userportal/admin/addUser"
@@ -75,7 +75,7 @@ public class RDAdminPortalController {
 			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
 
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[" + messages.toString() + "]");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
 		}
 	}
 	
@@ -87,7 +87,7 @@ public class RDAdminPortalController {
 		
 		LOGGER.info("Request : User instance updated by " + paramMap.get("username"));
 		
-		List<String> messages = validator.validateUser(user, RDHubConstancts.USER_UPDATE);
+		List<String> messages = validator.validateUser(user, RDHubConstancts.RECORD_UPDATE);
 		if (null == messages) {
 			String url = rdCache.getUserPortalInfo()
 					+ "/userportal/admin/updateUser"
@@ -104,7 +104,7 @@ public class RDAdminPortalController {
 			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
 
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[" + messages.toString() + "]");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
 		}
 	}
 	
@@ -133,7 +133,7 @@ public class RDAdminPortalController {
 			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
 
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[" + messages.toString() + "]");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
 		}
 	}
 	
@@ -162,7 +162,7 @@ public class RDAdminPortalController {
 			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
 
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[" + messages.toString() + "]");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
 		}
 	}
 
@@ -174,7 +174,7 @@ public class RDAdminPortalController {
 		
 		LOGGER.info("Request : Create login account to " + loginDTO.getUsername() + " by " + paramMap.get("username"));
 		
-		List<String> messages = validator.validateLoginAccount(loginDTO);
+		List<String> messages = validator.validateLoginAccount(loginDTO, RDHubConstancts.RECORD_ADD);
 		if (null == messages) {
 			loginDTO.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
 			loginDTO.setConfimPwd(passwordEncoder.encode(loginDTO.getConfimPwd()));
@@ -194,7 +194,36 @@ public class RDAdminPortalController {
 			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
 
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[" + messages.toString() + "]");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
+		}
+	}
+	
+	@RequestMapping(value = "/loginAccountUpdateStatusByAdmin", method = RequestMethod.PUT)
+	public ResponseEntity<?> loginAccountUpdateStatusByAdmin(
+			@RequestParam Map<String, String> paramMap,
+			@RequestBody RDLoginDTO loginDTO,
+			@RequestHeader(value = "token", required = true) String token) throws Exception {
+		
+		LOGGER.info("Request : Update status of login account of " + loginDTO.getUserDid() + " by " + paramMap.get("username"));
+		
+		List<String> messages = validator.validateBeforeStatusUpdateOfLoginAccount(loginDTO);
+		if (null == messages) {
+			String url = rdCache.getUserPortalInfo()
+					+ "/userportal/admin/loginAccountUpdateStatusByAdmin"
+					+ "?username=" + paramMap.get("username");
+
+			HttpHeaders httpHeader = new HttpHeaders();
+			httpHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			httpHeader.set("Authorization", "Bearer " + token);
+			HttpEntity<Object> entity = new HttpEntity<Object>(loginDTO, httpHeader);
+			
+			ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<List<String>>() {};
+			ResponseEntity<List<String>> resEntity = restTemplate.exchange(url.toString(), HttpMethod.PUT, entity, responseType);
+			messages = resEntity.getBody();
+			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
+
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
 		}
 	}
 }

@@ -18,7 +18,8 @@ public class RDHubInterceptorConfigurer implements WebMvcConfigurer {
 				.addInterceptor(rdHubInterceptor)
 				.excludePathPatterns("/js/**", "/css/**", "/images/**", "/lib/**", "/fonts/**")
 				.excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**")
-				.excludePathPatterns("/rad/getToken", "/rad/revokeToken", "/rad/removeRFToken");
+				.excludePathPatterns("/rad/getToken", "/rad/revokeToken", "/rad/removeRFToken")
+				.excludePathPatterns("/userportal/visitor/registerUser");
 	}
 	
 	@Override
