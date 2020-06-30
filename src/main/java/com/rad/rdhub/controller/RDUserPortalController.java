@@ -105,6 +105,34 @@ public class RDUserPortalController {
 		}
 	}
 
+	@RequestMapping(value = "/deleteContactDetails", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteContactDetails(
+			@RequestParam Map<String, String> paramMap,
+			@RequestBody Long[] dids,
+			@RequestHeader(name = "token", required = true) String token) throws Exception {
+		LOGGER.info("Request : Delete contacts by : " + paramMap.get("username"));
+		
+		List<String> messages = validator.validateContactDidsToDelete(dids);
+		if (null == messages) {
+			String url = rdCache.getUserPortalInfo()
+					+ "/userportal/user/deleteContactDetails"
+					+ "?username=" + paramMap.get("username");
+	
+			HttpHeaders httpHeader = new HttpHeaders();
+			httpHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			httpHeader.set("Authorization", "Bearer " + token);
+			HttpEntity<Object> entity = new HttpEntity<Object>(dids, httpHeader);
+			
+			ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<List<String>>() {};
+			ResponseEntity<List<String>> resEntity = restTemplate.exchange(url.toString(), HttpMethod.DELETE, entity, responseType);
+			messages = resEntity.getBody();
+			return ResponseEntity.status(HttpStatus.OK).body(messages.toString());
+
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages.toString());
+		}
+	}
+	
 	@RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
 	public ResponseEntity<?> registerUser(
 			@RequestParam Map<String, String> paramMap,

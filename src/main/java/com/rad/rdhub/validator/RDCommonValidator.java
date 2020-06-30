@@ -201,6 +201,17 @@ public class RDCommonValidator {
 
 		return messageList;
 	}
+
+	public List<String> validateContactDidsToDelete(Long[] dids) throws Exception {
+		List<String> messageList = null;
+		
+		if (null == dids || 0 == dids.length) {
+			messageList = new ArrayList<String>();
+			messageList.add("Please provide contact(s) to be deleted");
+		}
+
+		return messageList;
+	}
 	
 	public String encodePasswd(String pwd) throws Exception {
 		return passwordEncoder.encode(pwd);
