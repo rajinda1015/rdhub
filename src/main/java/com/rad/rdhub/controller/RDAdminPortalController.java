@@ -204,7 +204,7 @@ public class RDAdminPortalController {
 			@RequestBody RDLoginDTO loginDTO,
 			@RequestHeader(value = "token", required = true) String token) throws Exception {
 		
-		LOGGER.info("Request : Update status of login account of " + loginDTO.getUserDid() + " by " + paramMap.get("username"));
+		LOGGER.info("Request : Update status of login account of " + loginDTO.getDid() + " by " + paramMap.get("username"));
 		
 		List<String> messages = validator.validateBeforeStatusUpdateOfLoginAccount(loginDTO);
 		if (null == messages) {

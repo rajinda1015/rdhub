@@ -22,12 +22,12 @@ public class RDCommonValidator {
 	public List<String> validateUser(RDUserDTO user, int action) throws Exception {
 		List<String> messageList = null;
 
-		if (action == RDHubConstancts.RECORD_ADD && (null != user.getUserDid() && user.getUserDid() > 0)) {
+		if (action == RDHubConstancts.RECORD_ADD && (null != user.getDid() && user.getDid() > 0)) {
 			messageList = new ArrayList<String>();
 			messageList.add("Cannot insert existing user again");
 		}
 
-		if (action == RDHubConstancts.RECORD_UPDATE && (null == user.getUserDid() || user.getUserDid() == 0)) {
+		if (action == RDHubConstancts.RECORD_UPDATE && (null == user.getDid() || user.getDid() == 0)) {
 			if (null == messageList) { messageList = new ArrayList<String>(); }
 			messageList.add("Please select user before update the details");
 		}
@@ -71,7 +71,7 @@ public class RDCommonValidator {
 		List<String> messageList = null;
 		
 		if (action == RDHubConstancts.RECORD_ADD) {
-			if (null == loginAccount.getUserDid() || loginAccount.getUserDid().longValue() < 0) {
+			if (null == loginAccount.getDid() || loginAccount.getDid().longValue() < 0) {
 				messageList = new ArrayList<String>();
 				messageList.add("Please select user to be created login account");
 			}
@@ -106,7 +106,7 @@ public class RDCommonValidator {
 	public List<String> validateBeforeStatusUpdateOfLoginAccount(RDLoginDTO loginAccount) throws Exception {
 		List<String> messageList = null;
 		
-		if (null == loginAccount.getUserDid() || loginAccount.getUserDid().longValue() < 0) {
+		if (null == loginAccount.getDid() || loginAccount.getDid().longValue() < 0) {
 			messageList = new ArrayList<String>();
 			messageList.add("Please select user before update login account");
 		}
@@ -157,8 +157,10 @@ public class RDCommonValidator {
 					}
 				}
 				
-				if (null == contact.getUserDid() || contact.getUserDid() <= 0) {
-					++msgUserdid;
+				if (action == RDHubConstancts.RECORD_ADD) {
+					if (null == contact.getUserDid() || contact.getUserDid() <= 0) {
+						++msgUserdid;
+					}
 				}
 				
 				if (null == contact.getType() || contact.getType().intValue() == 0) {
